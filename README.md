@@ -62,22 +62,12 @@ Shows a category-wise summary of expenses using a simple chart or breakdown list
 
 ## App Screenshots
 
-Add your final app screenshots below after completing the UI.
-
-### Splash Screen
-
-<!-- Add Splash Screen screenshot here -->
-
-```md
-![Splash Screen](./screenshots/splash-screen.png)
-```
-
 ### Home Dashboard
 
 <!-- Add Home Dashboard screenshot here -->
 
 ```md
-![Home Dashboard](./screenshots/home-dashboard.png)
+![Home Dashboard](./screenshots/home-dashboard.jpeg)
 ```
 
 ### Add Expense Screen
@@ -85,15 +75,21 @@ Add your final app screenshots below after completing the UI.
 <!-- Add Add Expense screenshot here -->
 
 ```md
-![Add Expense Screen](./screenshots/add-expense.png)
+![Add Expense Screen](./screenshots/add-expense.jpeg)
 ```
+### Expenses Screen
 
+<!-- Add Splash Screen screenshot here -->
+
+```md
+![Splash Screen](./screenshots/expenses-screen.jpeg)
+```
 ### Edit Expense Screen
 
 <!-- Add Edit Expense screenshot here -->
 
 ```md
-![Edit Expense Screen](./screenshots/edit-expense.png)
+![Edit Expense Screen](./screenshots/edit-expense.jpeg)
 ```
 
 ### Spending Summary Screen
@@ -101,7 +97,7 @@ Add your final app screenshots below after completing the UI.
 <!-- Add Spending Summary screenshot here -->
 
 ```md
-![Spending Summary Screen](./screenshots/spending-summary.png)
+![Spending Summary Screen](./screenshots/spending-summary.jpeg)
 ```
 
 ## Tech Stack
