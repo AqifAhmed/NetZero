@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, Modal, TextInput,
   TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
@@ -76,10 +77,11 @@ export default function ExpenseModal({ visible, onClose, editingExpense }) {
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.root}
-      >
+      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
             <Ionicons name="close" size={22} color={COLORS.textSecondary} />
@@ -256,7 +258,8 @@ export default function ExpenseModal({ visible, onClose, editingExpense }) {
             </TouchableOpacity>
           </TouchableOpacity>
         </Modal>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </Modal>
   );
 }
