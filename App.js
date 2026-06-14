@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ExpensesProvider } from './src/context/ExpensesContext';
 import { COLORS } from './src/constants/theme';
@@ -18,10 +19,13 @@ const MyTheme = {
 
 export default function App() {
   return (
-    <ExpensesProvider>
-      <NavigationContainer theme={MyTheme}>
-        <MainTab />
-      </NavigationContainer>
-    </ExpensesProvider>
+    <SafeAreaProvider>
+      <ExpensesProvider>
+        <NavigationContainer theme={MyTheme}>
+          <MainTab />
+        </NavigationContainer>
+      </ExpensesProvider>
+    </SafeAreaProvider>
   );
 }
+

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView,
+  View, Text, StyleSheet, FlatList, TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING, CATEGORIES, CATEGORY_COLORS } from '../constants/theme';
 import { useExpenses } from '../context/ExpensesContext';
 import ExpenseCard from '../components/ExpenseCard';

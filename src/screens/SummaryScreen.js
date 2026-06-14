@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, SafeAreaView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { PieChart } from 'react-native-chart-kit';
 import { COLORS, SPACING, CATEGORIES, CATEGORY_COLORS } from '../constants/theme';
 import { useExpenses } from '../context/ExpensesContext';
