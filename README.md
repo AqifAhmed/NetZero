@@ -65,40 +65,25 @@ Shows a category-wise summary of expenses using a simple chart or breakdown list
 ### Home Dashboard
 
 <!-- Add Home Dashboard screenshot here -->
-
-```md
 ![Home Dashboard](./screenshots/home-dashboard.jpeg)
-```
 
 ### Add Expense Screen
 
 <!-- Add Add Expense screenshot here -->
-
-```md
 ![Add Expense Screen](./screenshots/add-expense.jpeg)
-```
 ### Expenses Screen
 
 <!-- Add Splash Screen screenshot here -->
-
-```md
-![Splash Screen](./screenshots/expenses-screen.jpeg)
-```
+![Expenses Screen](./screenshots/expenses-screen.jpeg)
 ### Edit Expense Screen
 
 <!-- Add Edit Expense screenshot here -->
-
-```md
 ![Edit Expense Screen](./screenshots/edit-expense.jpeg)
-```
 
 ### Spending Summary Screen
 
 <!-- Add Spending Summary screenshot here -->
-
-```md
 ![Spending Summary Screen](./screenshots/spending-summary.jpeg)
-```
 
 ## Tech Stack
 
