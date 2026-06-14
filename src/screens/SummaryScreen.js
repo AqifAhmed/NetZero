@@ -30,7 +30,6 @@ export default function SummaryScreen() {
         <Text style={styles.title}>Summary</Text>
       </View>
       
-      {/* Fixed section always shown at the top */}
       <View style={styles.fixedContent}>
         <MonthSelector />
         
@@ -74,7 +73,6 @@ export default function SummaryScreen() {
         )}
       </View>
 
-      {/* Scrollable list content */}
       {isEmpty ? (
         <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
           <EmptyState

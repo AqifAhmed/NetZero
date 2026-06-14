@@ -27,7 +27,6 @@ export default function MonthSelector() {
   const isFocused = useIsFocused();
   const wasFocusedRef = useRef(false);
 
-  // Sync scroll position when active month changes externally, or when this tab becomes focused
   useEffect(() => {
     if (isFocused) {
       if (selectedIndex !== -1 && flatListRef.current) {
