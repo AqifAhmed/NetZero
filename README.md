@@ -1,250 +1,188 @@
 # Net Zero — Expense Tracker App
 
-Net Zero is a simple and clean React Native expense tracker built for managing daily expenses. The app allows users to add, edit, delete, categorize, and view their expenses in a monthly dashboard.
+A mobile expense tracker built with React Native and Expo. The app lets you log daily expenses, filter by month and category, and see a visual breakdown of where your money is going. Everything is stored locally on the device using AsyncStorage — no login, no internet required.
 
-This project uses local storage with AsyncStorage, so it works offline and does not require any backend, login system, or cloud database.
-
-## Project Status
-
-Open Source Project
-Built by: Aqif Ahmed
-Platform: React Native
-Storage: AsyncStorage
-Backend: Not required
+---
 
 ## Features
 
-* Add new expenses
-* Edit existing expenses
-* Delete expenses
-* Categorize expenses using tags
-* View total spending for the selected month
-* View recent transactions
-* Filter expenses by month
-* View spending summary by category
-* Dark theme UI
-* Empty state messages
-* Offline local storage using AsyncStorage
+- Add, edit, and delete expense entries
+- Filter expenses by month using a month selector
+- Filter by category on the Expenses screen (All, Food, Transport, Shopping, Bills, Other)
+- Home dashboard with total PKR spent and recent transactions
+- Summary screen with a pie chart and per-category breakdown with percentages
+- Built-in calendar picker for selecting expense dates (future dates disabled)
+- Form validation on the add/edit modal
+- Data persists across app restarts via AsyncStorage
+- Selected month also persists so the app reopens where you left off
+- Dark themed UI throughout
 
-## Categories
-
-The app supports the following expense categories:
-
-* Food
-* Transport
-* Shopping
-* Bills
-* Other
+---
 
 ## Screens
 
-The project includes the following main screens:
+### Home
+Shows the app name, a hero card with total spent and transaction count for the selected month, the month selector, and a list of recent transactions (up to 20). Has an Add button to open the expense modal. Tapping any expense card opens it in edit mode.
 
-### 1. Splash Screen
+### Expenses
+Full scrollable list of all expenses for the selected month. Has category filter chips at the top to narrow down by Food, Transport, Shopping, Bills, or Other. Each card has a delete button. Tapping a card opens the edit modal.
 
-Displays the app name and gives the app a clean startup experience.
+### Summary
+Shows total spent for the month, a pie chart with category-colored slices, and a list of each category with its amount, percentage, and a proportional progress bar.
 
-### 2. Home Dashboard
+### Expense Modal (Add / Edit)
+A slide-up modal used for both adding and editing expenses. Contains a title field, amount field (PKR), a calendar date picker, and a category selector with icon chips. In edit mode a delete button is also shown.
 
-Shows the selected month, total spending, recent transactions, and navigation options.
-
-### 3. Add Expense Screen
-
-Allows users to add a new expense by entering title, amount, category, and date.
-
-### 4. Edit Expense Screen
-
-Allows users to update or delete an existing expense.
-
-### 5. Spending Summary Screen
-
-Shows a category-wise summary of expenses using a simple chart or breakdown list.
-
-## App Screenshots
-
-### Home Dashboard
-
-<!-- Add Home Dashboard screenshot here -->
-![Home Dashboard](./screenshots/home-dashboard.jpeg)
-
-### Add Expense Screen
-
-<!-- Add Add Expense screenshot here -->
-![Add Expense Screen](./screenshots/add-expense.jpeg)
-### Expenses Screen
-
-<!-- Add Splash Screen screenshot here -->
-![Expenses Screen](./screenshots/expenses-screen.jpeg)
-### Edit Expense Screen
-
-<!-- Add Edit Expense screenshot here -->
-![Edit Expense Screen](./screenshots/edit-expense.jpeg)
-
-### Spending Summary Screen
-
-<!-- Add Spending Summary screenshot here -->
-![Spending Summary Screen](./screenshots/spending-summary.jpeg)
+---
 
 ## Tech Stack
 
-* React Native
-* JavaScript
-* AsyncStorage
-* React Navigation
-* Chart library for spending summary
-* Dark theme styling
+| Technology | Version |
+|---|---|
+| React Native | 0.81.5 |
+| Expo | ~54.0.34 |
+| @react-navigation/native | 6.1.18 |
+| @react-navigation/bottom-tabs | 6.6.1 |
+| @react-native-async-storage/async-storage | 2.2.0 |
+| react-native-chart-kit | 6.12.3 |
+| react-native-svg | 15.12.1 |
+| @expo/vector-icons (Ionicons) | 15.1.1 |
+| date-fns | 3.6.0 |
+| react-native-safe-area-context | 5.6.0 |
+| react-native-screens | 4.16.0 |
 
-## Folder Structure
+---
 
-```bash
+## Project Structure
+
+```
 NetZero/
-│
 ├── src/
 │   ├── screens/
-│   │   ├── SplashScreen.jsx
-│   │   ├── HomeScreen.jsx
-│   │   ├── AddExpenseScreen.jsx
-│   │   ├── EditExpenseScreen.jsx
-│   │   └── SummaryScreen.jsx
-│   │
+│   │   ├── HomeScreen.js
+│   │   ├── ExpensesScreen.js
+│   │   └── SummaryScreen.js
 │   ├── components/
-│   │   ├── ExpenseCard.jsx
-│   │   ├── CategoryTag.jsx
-│   │   ├── MonthSelector.jsx
-│   │   ├── EmptyState.jsx
-│   │   └── TotalSpentCard.jsx
-│   │
-│   ├── storage/
-│   │   └── expenseStorage.js
-│   │
-│   ├── utils/
-│   │   ├── categories.js
-│   │   ├── dateUtils.js
-│   │   └── expenseUtils.js
-│   │
-│   └── navigation/
-│       └── AppNavigator.jsx
-│
-├── App.jsx
+│   │   ├── ExpenseCard.js
+│   │   └── ExpenseModal.js
+│   ├── context/
+│   │   └── ExpensesContext.js
+│   ├── navigation/
+│   │   └── MainTab.js
+│   └── constants/
+│       └── theme.js
+├── app.json
 ├── package.json
-└── README.md
+└── index.js
 ```
 
-## Data Storage
+---
 
-The app uses AsyncStorage to save expenses locally on the device.
+## State Management
 
-Example expense object:
+Global state is managed through `ExpensesContext` using `useReducer`. The context is provided at the root level so all screens can access expenses and dispatch actions without prop drilling.
+
+**Actions:**
+- `LOAD_ALL` — loads expenses and selected date from AsyncStorage on startup
+- `ADD` — adds a new expense
+- `UPDATE` — updates an existing expense
+- `DELETE` — removes an expense by id
+- `SET_MONTH` — changes the selected month/year
+
+Whenever the expenses array changes, a `useEffect` automatically saves the updated list back to AsyncStorage.
+
+**Values exposed by the context:**
+- `filteredExpenses` — expenses filtered by the selected month
+- `totalThisMonth` — sum of amounts for the selected month
+- `spendByCategory` — object with totals per category for the selected month
+- `selectedMonth`, `selectedYear` — current month navigation state
+- `addExpense`, `updateExpense`, `deleteExpense`, `setMonth` — action functions
+- `loading` — boolean, true while AsyncStorage data is being loaded
+
+---
+
+## Data Model
+
+Each expense is stored as a plain object:
 
 ```js
 {
-  id: "1718370000000",
+  id: "1749900000000",       // timestamp string, used as unique key
   title: "Lunch",
-  amount: 450,
-  category: "Food",
-  date: "2026-06-14"
+  amount: 450,               // number, stored in PKR
+  category: "Food",          // one of: Food, Transport, Shopping, Bills, Other
+  date: "2026-06-14",        // yyyy-MM-dd string
+  createdAt: 1749900000000   // Date.now() at time of creation
 }
 ```
 
-## Main Storage Functions
+All expenses are stored as a JSON array under a single AsyncStorage key. The selected month and year are stored separately.
 
-The app can use the following storage functions:
+---
+
+## Categories
 
 ```js
-getExpenses()
-saveExpenses(expenses)
-addExpense(expense)
-updateExpense(id, updatedExpense)
-deleteExpense(id)
+['Food', 'Transport', 'Shopping', 'Bills', 'Other']
 ```
 
-## Installation
+Each category has a fixed color and Ionicons icon defined in `src/constants/theme.js`:
 
-Clone the repository:
+| Category | Color | Icon |
+|---|---|---|
+| Food | `#EF4444` | restaurant |
+| Transport | `#38BDF8` | car |
+| Shopping | `#FBBF24` | bag-handle |
+| Bills | `#86EFAC` | receipt |
+| Other | `#94A3B8` | ellipsis-horizontal-circle |
 
-```bash
-git clone https://github.com/AqifAhmed/NetZero.git
+---
+
+## Theme
+
+The app uses a dark color scheme defined in `src/constants/theme.js`:
+
+```js
+background:      '#0F172A'
+surface:         '#1E293B'
+surfaceElevated: '#2A3547'
+border:          '#334155'
+primary:         '#22C55E'   // green accent
+text:            '#FFFFFF'
+textSecondary:   '#94A3B8'
+textMuted:       '#64748B'
 ```
 
-Go to the project folder:
+---
+
+## Getting Started
+
+Clone the repo and install dependencies:
 
 ```bash
-cd net-zero
-```
-
-Install dependencies:
-
-```bash
+git clone https://github.com/aqifahmed/NetZero.git
+cd NetZero
 npm install
 ```
 
-Start the project:
+Start the Expo dev server:
 
 ```bash
-npm start
+npx expo start
 ```
 
-For Android:
+Run on Android or iOS:
 
 ```bash
-npm run android
+npx expo start --android
+npx expo start --ios
 ```
 
-For iOS:
+> Requires Node.js and Expo CLI. For physical device testing, install the Expo Go app.
 
-```bash
-npm run ios
-```
+---
 
-## Required Packages
+## Built By
 
-Install AsyncStorage:
-
-```bash
-npm install @react-native-async-storage/async-storage
-```
-
-Install React Navigation:
-
-```bash
-npm install @react-navigation/native
-```
-
-Install required navigation dependencies:
-
-```bash
-npm install react-native-screens react-native-safe-area-context
-```
-
-Install native stack navigator:
-
-```bash
-npm install @react-navigation/native-stack
-```
-
-For charts, you can use:
-
-```bash
-npm install react-native-chart-kit react-native-svg
-```
-
-## Project Scope
-
-The goal is to demonstrate core React Native skills such as:
-
-* State management
-* Navigation
-* CRUD operations
-* Local storage
-* Component-based UI
-* Monthly filtering
-* Data visualization
-* Clean mobile app design
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Author
-
-Aqif Ahmed
+- Aqif Ahmed — [github.com/aqifahmed](https://github.com/aqifahmed)
+- Danish Hamid
