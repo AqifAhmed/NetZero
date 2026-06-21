@@ -1,0 +1,323 @@
+  AWP Term Project — Net Zero Expense Tracker
+  Student: Aqif Ahmed | L1F23BSSE0095
+  Partner: Danish Hamid | L1F23BSSE0106
+
+  github: https://github.com/AqifAhmed/NetZero
+
+
+STEP 1 - Project Setup (Expo + React Native)
+  - Initialized project using Expo SDK 54 (npx create-expo-app)
+  - Chose a blank template and confirmed React Native 0.81.5 as the base
+  - Installed all required dependencies:
+      * @react-navigation/native + @react-navigation/bottom-tabs (navigation)
+      * @react-native-async-storage/async-storage (local persistence)
+      * react-native-chart-kit + react-native-svg (pie chart on Summary screen)
+      * @expo/vector-icons / Ionicons (category and tab icons)
+      * date-fns (date formatting and arithmetic)
+      * react-native-safe-area-context + react-native-screens (navigation support)
+  - Entry point is index.js which registers the root App component
+
+STEP 2 - Folder Structure & Architecture Planning
+  - Decided on a feature-based folder layout inside src/:
+      * src/screens/     — HomeScreen.js, ExpensesScreen.js, SummaryScreen.js
+      * src/components/  — ExpenseCard.js, ExpenseModal.js
+      * src/context/     — ExpensesContext.js
+      * src/navigation/  — MainTab.js
+      * src/constants/   — theme.js
+  - Defined the global theme palette (dark navy + green accent) in theme.js
+    before writing any screen code so colors are consistent everywhere
+  - theme.js exports COLORS (background, surface, primary green, text variants)
+    and CATEGORIES array with color + Ionicons icon per category
+
+STEP 3 - Data Model & Category Definitions
+  - Designed a flat expense object structure:
+      { id, title, amount, category, date, createdAt }
+  - id is a timestamp string (Date.now().toString()) — simple unique key
+  - amount is stored as a number in PKR
+  - date is stored as a 'yyyy-MM-dd' string (date-fns format)
+  - category is one of: 'Food', 'Transport', 'Shopping', 'Bills', 'Other'
+  - Each category has a fixed color and icon defined in theme.js:
+      Food → #EF4444 / restaurant
+      Transport → #38BDF8 / car
+      Shopping → #FBBF24 / bag-handle
+      Bills → #86EFAC / receipt
+      Other → #94A3B8 / ellipsis-horizontal-circle
+
+STEP 4 - Global State with Context API + useReducer
+  - Created ExpensesContext.js using createContext()
+  - State is managed through useReducer instead of multiple useState calls
+    because the state has multiple related fields that change together
+  - Defined five reducer actions:
+      LOAD_ALL   — restores expenses + selectedMonth/Year from AsyncStorage
+      ADD        — appends a new expense object to the array
+      UPDATE     — replaces an existing expense matched by id
+      DELETE     — filters out the expense with the given id
+      SET_MONTH  — updates selectedMonth and selectedYear for navigation
+  - Context exposes derived values (not just raw state):
+      filteredExpenses  — expenses filtered to the selected month/year
+      totalThisMonth    — sum of amounts for those expenses
+      spendByCategory   — object with per-category totals for the month
+  - Also exposes selectedMonth, selectedYear, loading, and action functions:
+      addExpense, updateExpense, deleteExpense, setMonth
+
+STEP 5 - AsyncStorage Persistence
+  - On mount, a useEffect in ExpensesContext dispatches LOAD_ALL
+    after reading two keys from AsyncStorage:
+      'expenses'     — JSON array of all expense objects
+      'selectedDate' — JSON object with month and year
+  - A separate useEffect watches the expenses array; whenever it changes,
+    it serializes and saves the updated array back to AsyncStorage
+  - This means add/update/delete operations automatically persist without
+    any extra calls — the save is triggered reactively by state change
+  - loading state starts as true and is set to false after LOAD_ALL runs;
+    screens show a loading indicator until this is done
+
+STEP 6 - Bottom Tab Navigation
+  - Created MainTab.js using createBottomTabNavigator from React Navigation
+  - Three tabs: Home (home-outline), Expenses (list-outline), Summary (pie-chart-outline)
+  - Tab bar styled with dark navy background and green active tint
+  - App.js wraps MainTab in NavigationContainer and provides ExpensesProvider
+    so context is available to all screens and components
+  - Safe area handling is done via SafeAreaProvider from react-native-safe-area-context
+
+STEP 7 - HomeScreen
+  - Displays the app name at the top
+  - Hero card shows total PKR spent and transaction count for the selected month
+  - Month selector (left/right arrows) lets the user navigate months
+    — setMonth() from context updates selectedMonth/Year in global state
+  - Recent transactions list renders up to 20 of the filteredExpenses using FlatList
+  - Each row is an <ExpenseCard> component (tapping opens it in edit mode)
+  - A floating Add (+) button at the bottom-right opens <ExpenseModal> in add mode
+  - All monetary values formatted as 'PKR X,XXX' using toLocaleString()
+
+STEP 8 - ExpensesScreen
+  - Full scrollable list of all filteredExpenses for the selected month
+  - Category filter chips at the top: All, Food, Transport, Shopping, Bills, Other
+  - Selecting a chip filters the already-filtered list further by category
+  - Each expense is an <ExpenseCard>; tapping opens <ExpenseModal> in edit mode
+  - The delete button on each card calls deleteExpense(id) from context directly
+  - Empty state message shown when no expenses match the active filter
+
+STEP 9 - SummaryScreen
+  - Shows total spent for the selected month at the top
+  - Pie chart rendered using PieChart from react-native-chart-kit
+    — data is derived from spendByCategory (categories with amount > 0 only)
+    — each slice uses the category color from theme.js
+  - Below the chart: a list of each category with:
+      * Category name and amount in PKR
+      * Percentage of total spend
+      * A proportional progress bar (View with dynamic width %)
+  - Categories with zero spend are hidden to keep the summary clean
+  - If no expenses exist for the month, shows a "No data" placeholder
+
+STEP 10 - ExpenseCard Component
+  - Reusable card component used in both HomeScreen and ExpensesScreen
+  - Receives a single 'expense' prop and renders: category icon + color dot,
+    title, date (formatted with date-fns format()), and amount
+  - onPress prop (passed from parent) handles opening the edit modal
+  - Styled with surfaceElevated background and a left-side category color border
+
+STEP 11 - ExpenseModal Component (Add + Edit)
+  - A slide-up modal (Modal + Animated.spring) used for both add and edit flows
+  - Fields:
+      * Title input (text)
+      * Amount input (numeric keyboard, PKR)
+      * Date picker — built-in calendar grid (custom component, no library)
+        Future dates are disabled; selected date highlighted in green
+      * Category selector — horizontal row of icon chips, one per category
+        Tapping a chip selects it (highlighted in category color)
+  - In add mode: onSubmit calls addExpense() with a new id (Date.now())
+  - In edit mode: form pre-fills with the existing expense data;
+    onSubmit calls updateExpense(); a Delete button calls deleteExpense()
+  - Form validation: title and amount must not be empty before submitting
+  - After submission the modal closes and form state resets
+
+STEP 12 - Theme & Styling
+  - All colors imported from src/constants/theme.js — no hardcoded hex values
+    in component files
+  - Dark color scheme:
+      background:      '#0F172A'  (dark navy)
+      surface:         '#1E293B'
+      surfaceElevated: '#2A3547'
+      border:          '#334155'
+      primary:         '#22C55E'  (green accent)
+      text:            '#FFFFFF'
+      textSecondary:   '#94A3B8'
+      textMuted:       '#64748B'
+  - All StyleSheet.create() calls use COLORS.* references
+  - Consistent border radius, padding, and shadow values across all cards
+
+STEP 13 - Final Feature Checklist
+  ✔ Add, edit, and delete expense entries via modal
+  ✔ Filter expenses by month (month selector on Home and Expenses screens)
+  ✔ Filter expenses by category on the Expenses screen
+  ✔ Home dashboard with total spent and recent transactions
+  ✔ Summary screen with pie chart and per-category breakdown
+  ✔ Calendar date picker with future dates disabled
+  ✔ Form validation on add/edit modal
+  ✔ Data persists across restarts via AsyncStorage
+  ✔ Selected month persists so app reopens in the same state
+  ✔ Dark themed UI throughout (0F172A background, 22C55E green accent)
+  ✔ Bottom tab navigation (Home / Expenses / Summary)
+
+
+AI INTERACTION RECORD
+
+Step 4 (useReducer):
+  I asked AI: What is the difference between useState and useReducer,
+  and when should I use useReducer?
+  AI explained that useReducer is better when multiple state values are
+  updated together or when the next state depends on the previous state.
+  I modified: Applied this to the expense state — combined expenses array,
+  selectedMonth, selectedYear, and loading into one reducer so all LOAD_ALL
+  data arrives in a single dispatch instead of multiple setState calls.
+
+Step 5 (AsyncStorage persistence):
+  I asked AI: How do I persist React Native state to AsyncStorage and
+  restore it when the app opens?
+  AI gave a basic example using getItem/setItem in useEffect.
+  I modified: Split the logic into two separate effects — one for loading
+  on mount and one for auto-saving whenever the expenses array changes.
+  Also added a separate key for the selected date so the month view persists.
+
+Step 7 (Month selector):
+  I asked AI: How to implement prev/next month navigation in React
+  without going out of bounds on month/year rollover?
+  AI gave a basic increment/decrement example.
+  I modified: Added rollover logic — when month goes below 1 it wraps to
+  December of the prior year; when it exceeds 12 it wraps to January of
+  the next year. Used date-fns to keep formatting consistent.
+
+Step 9 (Pie chart):
+  I asked AI: How to use react-native-chart-kit PieChart with dynamic data?
+  AI gave an example with hardcoded data entries.
+  I modified: Built the chart data array dynamically from spendByCategory —
+  filtering out zero-amount categories and mapping each to the correct
+  color from CATEGORIES in theme.js so chart slices match the app's colors.
+
+Step 11 (Calendar date picker):
+  I asked AI: How to build a custom inline calendar grid in React Native
+  without using a third-party date picker library?
+  AI gave a basic grid-building approach using a 2D array of week rows.
+  I modified: Added logic to disable future dates (comparing each cell to
+  today using date-fns isAfter()), styled the selected date with the primary
+  green color, and showed the correct day-of-week offset for the first of
+  each month.
+
+
+PROBLEMS FACED
+
+
+Problem 1: useReducer initial state not loading from AsyncStorage
+  - On first render, expenses showed as empty even after AsyncStorage had data
+  - The issue was that the LOAD_ALL dispatch was async but the initial render
+    happened before the AsyncStorage.getItem() Promise resolved
+  - This caused a flash of empty content every time the app opened
+
+Problem 2: Pie chart crashing when all expenses are zero
+  - react-native-chart-kit's PieChart throws an error if the data array
+    is empty or all values are zero
+  - When a month had no expenses the Summary screen would crash on open
+
+Problem 3: Month rollover going negative
+  - Pressing the left arrow on January decremented month to 0
+  - JavaScript's Date and date-fns both use 1-based months, so month 0
+    caused invalid date formatting and wrong filter results
+
+Problem 4: Modal form not resetting after submission
+  - After adding an expense and closing the modal, reopening it showed
+    the previously entered values still in the fields
+  - useState for form fields was not being reset after the modal closed
+
+Problem 5: Category filter chip staying selected after changing month
+  - If "Food" was selected as the active filter on ExpensesScreen and the
+    user changed the month from HomeScreen, the filter chip remained active
+  - The filtered list showed 0 results even when the new month had Food expenses
+    because the category filter was not resetting on month change
+
+Problem 6: Amount field accepting non-numeric input
+  - Using keyboardType='numeric' on the amount TextInput still allowed
+    characters like '.' to be entered multiple times (e.g. "45..0")
+  - Submitting with a malformed amount stored NaN in AsyncStorage
+
+
+SOLUTIONS
+
+Solution 1 (AsyncStorage loading):
+  - Added a loading boolean to the reducer state (initially true)
+  - LOAD_ALL sets loading to false after populating the state
+  - All three screens check the loading flag and render an ActivityIndicator
+    while it is true, preventing any flash of empty content
+
+Solution 2 (Pie chart crash):
+  - Added a guard before rendering the chart:
+    if spendByCategory has no entries with amount > 0, render a
+    "No expenses this month" placeholder Text instead of the PieChart
+
+Solution 3 (Month rollover):
+  - Rewrote the setMonth logic with explicit bounds:
+      if (newMonth < 1)  → newMonth = 12, newYear = year - 1
+      if (newMonth > 12) → newMonth = 1,  newYear = year + 1
+  - Tested by pressing the left arrow 13 times from any starting month
+
+Solution 4 (Form reset):
+  - Added a useEffect inside ExpenseModal that watches the 'visible' prop
+  - When visible changes to false, all form state (title, amount, date,
+    category) is reset to default values
+  - This ensures the modal is always clean when opened again
+
+Solution 5 (Category filter reset):
+  - Moved the activeCategory state up one level so it resets to 'All'
+    whenever selectedMonth or selectedYear changes in the context
+  - Used a useEffect in ExpensesScreen that depends on [selectedMonth,
+    selectedYear] and calls setActiveCategory('All')
+
+Solution 6 (Amount validation):
+  - Added a parseFloat check in the onSubmit handler:
+      if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) → show error
+  - Also stripped any non-numeric characters except one decimal point
+    using a regex replace inside the onChange handler before setting state
+
+
+LEARNING REFLECTION
+
+What I understood:
+  - How useReducer is better than multiple useState calls when state values
+    are related — grouping them in one reducer made LOAD_ALL, ADD, UPDATE,
+    and DELETE much cleaner than updating 4 separate state variables
+  - How React Native's component model differs from React web — no div/span,
+    everything is View/Text/TouchableOpacity, and StyleSheet.create() replaces CSS
+  - How AsyncStorage works as a key-value store for local persistence —
+    serializing to JSON on save and parsing on load is the standard pattern
+  - How derived state (filteredExpenses, totalThisMonth, spendByCategory)
+    should be computed inside the context rather than in each screen,
+    so screens stay simple and just consume ready-to-use values
+  - How bottom tab navigation is configured with createBottomTabNavigator
+    and how to customize tab bar appearance (colors, icons, label style)
+  - How to build a custom calendar grid in React Native using a 2D array
+    of week rows and computed day-of-week offsets
+  - How react-native-chart-kit PieChart needs non-zero data and how to
+    guard against crashes with empty datasets
+
+What was difficult:
+  - The biggest challenge was the async gap between component mount and
+    AsyncStorage loading. It took a while to understand why loading: true
+    in the initial reducer state was the right fix rather than trying to
+    await inside the component body.
+  - Building the custom calendar picker was more involved than expected —
+    computing which column the 1st of each month falls on, filling the
+    trailing days, and disabling future cells all had edge cases.
+  - Getting the pie chart slices to use the exact same colors as the
+    category chips required carefully matching the data array order to
+    the CATEGORIES constant. Any mismatch caused wrong colors on slices.
+  - Managing the interaction between the month selector (on Home) and
+    the category filter chip (on Expenses) across two separate screens
+    required thinking carefully about where state should live.
+
+Overall:
+  This project brought together everything from the semester — component
+  architecture, props, state, context, navigation, and async data — in one
+  real app. The biggest shift from Assignment 2 was moving from useState
+  to useReducer for complex state, and from an API call to local AsyncStorage
+  for persistence. Building something that actually runs on a phone and saves
+  data across restarts felt like a significant step up from the web assignments.
